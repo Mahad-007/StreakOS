@@ -10,23 +10,8 @@ import {
 import { JournalEntry } from '@/hooks/useJournalEntries';
 import { CYCLES } from '@/lib/constants';
 
-// Register fonts
-Font.register({
-  family: 'Serif',
-  fonts: [
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/lora@latest/latin-400-normal.ttf', fontWeight: 400 },
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/lora@latest/latin-700-normal.ttf', fontWeight: 700 },
-  ],
-});
-
-Font.register({
-  family: 'Sans',
-  fonts: [
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.ttf', fontWeight: 400 },
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-600-normal.ttf', fontWeight: 600 },
-    { src: 'https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-700-normal.ttf', fontWeight: 700 },
-  ],
-});
+// Disable hyphenation to avoid font lookup issues
+Font.registerHyphenationCallback((word) => [word]);
 
 const styles = StyleSheet.create({
   // Title page
@@ -39,24 +24,21 @@ const styles = StyleSheet.create({
   },
   titleMain: {
     fontSize: 36,
-    fontFamily: 'Serif',
-    fontWeight: 700,
+    fontFamily: 'Times-Bold',
     color: '#FF6B2C',
     marginBottom: 12,
     textAlign: 'center',
   },
   titleSub: {
     fontSize: 14,
-    fontFamily: 'Sans',
-    fontWeight: 400,
+    fontFamily: 'Helvetica',
     color: '#94A3B8',
     textAlign: 'center',
     marginBottom: 6,
   },
   titleAuthor: {
     fontSize: 18,
-    fontFamily: 'Sans',
-    fontWeight: 600,
+    fontFamily: 'Helvetica-Bold',
     color: '#F1F5F9',
     marginTop: 30,
     textAlign: 'center',
@@ -69,8 +51,7 @@ const styles = StyleSheet.create({
   },
   titleQuote: {
     fontSize: 10,
-    fontFamily: 'Serif',
-    fontStyle: 'italic',
+    fontFamily: 'Times-Italic',
     color: '#64748B',
     textAlign: 'center',
     marginTop: 40,
@@ -94,15 +75,13 @@ const styles = StyleSheet.create({
   },
   cycleTitle: {
     fontSize: 16,
-    fontFamily: 'Sans',
-    fontWeight: 700,
+    fontFamily: 'Helvetica-Bold',
     color: '#FF6B2C',
     marginBottom: 3,
   },
   cycleTheme: {
     fontSize: 9,
-    fontFamily: 'Sans',
-    fontWeight: 400,
+    fontFamily: 'Helvetica',
     color: '#94A3B8',
   },
 
@@ -115,26 +94,23 @@ const styles = StyleSheet.create({
   },
   entryDate: {
     fontSize: 9,
-    fontFamily: 'Sans',
-    fontWeight: 600,
+    fontFamily: 'Helvetica-Bold',
     color: '#64748B',
     marginBottom: 6,
     letterSpacing: 0.5,
   },
   entryContent: {
     fontSize: 11,
-    fontFamily: 'Serif',
-    fontWeight: 400,
+    fontFamily: 'Times-Roman',
     color: '#1E293B',
     lineHeight: 1.7,
-    textAlign: 'justify',
   },
 
   // Page number
   pageNumber: {
     position: 'absolute',
     fontSize: 8,
-    fontFamily: 'Sans',
+    fontFamily: 'Helvetica',
     color: '#94A3B8',
     bottom: 30,
     left: 0,
