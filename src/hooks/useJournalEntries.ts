@@ -41,23 +41,31 @@ export function useJournalEntries() {
     fetchEntries();
   }, [fetchEntries]);
 
-  const updateEntry = async (id: string, content: string) => {
-    setEntries((prev) =>
-      prev.map((e) =>
-        e.id === id ? { ...e, journal_content: content, updated_at: new Date().toISOString() } : e
-      )
-    );
-
+  const updateEntry = async (id: string, content: string): Promise<boolean> => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('daily_entries')
         .update({ journal_content: content, updated_at: new Date().toISOString() })
-        .eq('id', id);
+        .eq('id', id)
+        .select('id, day_number, entry_date, journal_content, updated_at')
+        .single();
 
-      if (error) fetchEntries();
+      if (error) {
+        console.error('Journal save error:', error);
+        return false;
+      }
+
+      if (data) {
+        // Update local state with the confirmed server data
+        setEntries((prev) =>
+          prev.map((e) => (e.id === id ? (data as JournalEntry) : e))
+        );
+      }
+
+      return true;
     } catch (err) {
       console.error('Journal update error:', err);
-      fetchEntries();
+      return false;
     }
   };
 
