@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useRef } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { Profile } from '@/types';
+
+const PUBLIC_PATHS = ['/', '/login'];
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -12,26 +14,51 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
   const router = useRouter();
+  const pathname = usePathname();
+  const profileCache = useRef<Profile | null>(null);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        // getSession reads from local storage — instant, no network call
-        const { data: { session } } = await supabase.auth.getSession();
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
+    let mounted = true;
 
-        if (currentUser) {
-          const { data } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', currentUser.id)
-            .single();
+    const fetchProfile = async (userId: string) => {
+      // Use cache to avoid refetching on every auth event
+      if (profileCache.current?.id === userId) {
+        if (mounted) setProfile(profileCache.current);
+        return;
+      }
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        if (mounted && data) {
+          profileCache.current = data;
           setProfile(data);
         }
       } catch (err) {
-        console.error('Auth error:', err);
-      } finally {
+        console.error('Profile fetch error:', err);
+      }
+    };
+
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        if (mounted) {
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+          if (!PUBLIC_PATHS.includes(pathname)) {
+            router.replace('/login');
+          }
+        }
+        return;
+      }
+
+      if (mounted) {
+        setUser(session.user);
+        await fetchProfile(session.user.id);
         setLoading(false);
       }
     };
@@ -39,34 +66,33 @@ export function useAuth() {
     init();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-        if (currentUser) {
-          try {
-            const { data } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', currentUser.id)
-              .single();
-            setProfile(data);
-          } catch (err) {
-            console.error('Profile fetch error:', err);
-          }
-        } else {
+      (event, session) => {
+        if (!mounted) return;
+
+        if (event === 'SIGNED_OUT') {
+          setUser(null);
           setProfile(null);
+          profileCache.current = null;
+          router.replace('/login');
+          return;
+        }
+
+        // For SIGNED_IN, TOKEN_REFRESHED, etc. — update user if session exists
+        if (session?.user) {
+          setUser(session.user);
+          fetchProfile(session.user.id);
         }
       }
     );
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [pathname]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    router.push('/login');
   };
 
   return { user, profile, loading, signOut, supabase };
