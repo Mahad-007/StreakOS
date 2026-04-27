@@ -1,26 +1,154 @@
 @import "tailwindcss";
 
+/* ===== THEME SYSTEM ===== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Dark theme (default) */
+  --bg: #0A0E1A;
+  --bg-surface: #141822;
+  --bg-elevated: #1C2130;
+  --border: #2A3042;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  /* Accents */
+  --accent: #FF6B2C;
+  --accent-hover: #FF8A57;
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #EF4444;
+  --info: #38BDF8;
+
+  /* Task colors */
+  --task-fitness: #F87171;
+  --task-deep-work: #60A5FA;
+  --task-learning: #A78BFA;
+  --task-journal: #6EE7B7;
+
+  /* Gradients */
+  --gradient-fire: linear-gradient(135deg, #FF6B2C, #FF9F1C);
+  --gradient-success: linear-gradient(135deg, #34D399, #6EE7B7);
+  --gradient-glass: rgba(20, 24, 34, 0.7);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(255, 107, 44, 0.15);
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
 }
+
+.light {
+  --bg: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F1F5F9;
+  --border: #E2E8F0;
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+
+  --gradient-glass: rgba(255, 255, 255, 0.7);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px rgba(255, 107, 44, 0.1);
+}
+
+/* ===== TAILWIND THEME ===== */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --color-task-fitness: var(--task-fitness);
+  --color-task-deep-work: var(--task-deep-work);
+  --color-task-learning: var(--task-learning);
+  --color-task-journal: var(--task-journal);
+  --color-glass: var(--gradient-glass);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ===== BASE STYLES ===== */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===== CUSTOM UTILITIES ===== */
+
+.glass {
+  background: var(--gradient-glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.glow-orange {
+  box-shadow: 0 0 20px rgba(255, 107, 44, 0.2), 0 0 40px rgba(255, 107, 44, 0.1);
+}
+
+.glow-success {
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.2), 0 0 40px rgba(52, 211, 153, 0.1);
+}
+
+/* Progress bar shimmer */
+.progress-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+  background-size: 200% 100%;
+}
+
+/* Strikethrough animation */
+.task-done {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  opacity: 0.5;
 }

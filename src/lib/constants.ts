@@ -1,0 +1,225 @@
+import { Cycle, TaskDefinition } from '@/types';
+
+export const START_DATE = new Date('2026-04-27');
+export const END_DATE = new Date('2026-08-04');
+export const TOTAL_DAYS = 100;
+
+export const TASKS: TaskDefinition[] = [
+  {
+    id: 'fitness',
+    label: 'Fitness',
+    icon: 'Dumbbell',
+    time: '7:30 – 8:15 PM',
+    description: 'Strength training and conditioning',
+    color: '#F87171',
+  },
+  {
+    id: 'deep_work',
+    label: 'Deep Work',
+    icon: 'Laptop',
+    time: '8:30 – 10:30 PM',
+    description: 'Focused client work and project development',
+    color: '#60A5FA',
+  },
+  {
+    id: 'learning',
+    label: 'Learning',
+    icon: 'BookOpen',
+    time: '10:30 – 11:30 PM',
+    description: 'Skill development and continuous improvement',
+    color: '#A78BFA',
+  },
+  {
+    id: 'journal',
+    label: 'Journal',
+    icon: 'PenLine',
+    time: 'Before Sleep',
+    description: 'Reflect on achievements and challenges',
+    color: '#6EE7B7',
+  },
+];
+
+export const DISCIPLINE_RULES = [
+  { id: 'no_fast_food', label: 'No Fast Food', icon: 'UtensilsCrossed' },
+  { id: 'no_late_scrolling', label: 'No Late-Night Scrolling', icon: 'SmartphoneOff' },
+  { id: 'sleep_on_time', label: 'Sleep On Time', icon: 'Moon' },
+  { id: 'proper_grooming', label: 'Proper Grooming', icon: 'Sparkles' },
+] as const;
+
+export const CYCLES: Cycle[] = [
+  {
+    id: 1,
+    title: 'Foundation & Ignition',
+    theme: 'Build the engine. Establish discipline. Prove we can execute.',
+    start_day: 1,
+    end_day: 14,
+    start_date: '2026-04-27',
+    end_date: '2026-05-10',
+    goals: [
+      'Open the revenue pipeline — 30 quality Contra applications, 10–12% response rate, ≥1 discovery call booked.',
+      'Ship one product publicly — MVP live with ≥3 active users giving feedback by Day 14.',
+      'Establish the discipline floor — zero misses on daily fitness and deep-work blocks across days 1–7.',
+    ],
+    key_deliverables: [
+      'Contra application tracker with 30 logged apps, ≥3 responses, ≥1 booked call.',
+      'Live public product URL with ≥3 real users and written feedback captured.',
+      'Cycle 1 retro doc covering wins, misses, and Cycle 2 priorities.',
+    ],
+    reward: 'Movie Night',
+    warnings: ['First cycle — habit formation is fragile. No exceptions in days 1–7.'],
+  },
+  {
+    id: 2,
+    title: 'Revenue & Momentum',
+    theme: 'Turn discipline into revenue. Close deals. Build the pipeline.',
+    start_day: 15,
+    end_day: 28,
+    start_date: '2026-05-11',
+    end_date: '2026-05-24',
+    goals: [
+      'Deliver $12,000 CAD project milestone — on-time, on-spec.',
+      'Maintain $11/hour US client consistently — minimum 15 hours/week.',
+      'Close ≥1 new project from Cycle 1 pipeline. Target: $500+ value.',
+      'Send 10–15 quality proposals weekly across Upwork/Fiverr/Contra.',
+    ],
+    key_deliverables: [
+      'Revenue tracker showing income from all active projects.',
+      'Updated Upwork/Fiverr profiles optimized for visibility and conversions.',
+      '1 LinkedIn post per week sharing progress and building credibility.',
+      'Cycle 2 retro doc with revenue summary and Cycle 3 priorities.',
+    ],
+    reward: 'Team Dinner',
+    warnings: [],
+  },
+  {
+    id: 3,
+    title: 'Cycle 3 — Eid Cycle',
+    theme: 'Survive the holidays. Protect the streak. Minimum viable discipline.',
+    start_day: 29,
+    end_day: 42,
+    start_date: '2026-05-25',
+    end_date: '2026-06-07',
+    goals: [
+      'Maintain minimum work output — 4 hrs/day weekdays even during Eid.',
+      'Close 1 additional new client from proposals sent in Cycle 2.',
+      'Build 1 strong portfolio project — ship something impressive.',
+      'Reach out to past clients for repeat business and testimonials.',
+    ],
+    key_deliverables: [
+      'Portfolio project live and added to company website.',
+      '≥1 client testimonial collected and published.',
+      'Savings checkpoint — verify 50% savings rate on track.',
+      'Cycle 3 retro: honest assessment of holiday impact on discipline.',
+    ],
+    reward: 'Fun Activity',
+    warnings: [
+      'Eid-ul-Azha falls May 27–29. Three holidays + Friday meeting collision.',
+      'Plan only essential client work in last 4 days.',
+    ],
+  },
+  {
+    id: 4,
+    title: 'Startup Foundation',
+    theme: 'Build the company. Brand, website, portfolio, service packages.',
+    start_day: 43,
+    end_day: 56,
+    start_date: '2026-06-08',
+    end_date: '2026-06-21',
+    goals: [
+      'Company name & branding finalized — create professional identity.',
+      'Company website + portfolio live — showcase all work online.',
+      'Professional email registered on business domain.',
+      'Define clear service packages with pricing.',
+    ],
+    key_deliverables: [
+      'Live company website with professional portfolio (5–7 strong projects).',
+      'Service packages document with clear offerings and pricing tiers.',
+      'Business email set up and active on all profiles.',
+      'GitHub profile updated — showcase active development work.',
+    ],
+    reward: 'Movie Night',
+    warnings: ['Cycle ends right before Muharram. Build buffer for next cycle\'s slow start.'],
+  },
+  {
+    id: 5,
+    title: 'Scale & Systems',
+    theme: 'Systematize the workflow. Scale income. Build recurring revenue.',
+    start_day: 57,
+    end_day: 70,
+    start_date: '2026-06-22',
+    end_date: '2026-07-05',
+    goals: [
+      'Secure at least 2 recurring clients with consistent monthly work.',
+      'Stabilize workflow system — organized project management in place.',
+      'Total revenue target: on track for $15,000–$20,000 CAD by Day 100.',
+      'Improve GitHub presence — regular commits showing active development.',
+    ],
+    key_deliverables: [
+      'Recurring client agreements documented and active.',
+      'Project management system set up (Notion/Linear/Trello).',
+      'Revenue dashboard showing progress toward $15K–$20K target.',
+      'Expense tracker verifying 3–4 months emergency backup on track.',
+    ],
+    reward: 'Team Dinner',
+    warnings: ['Opens with Muharram (Jun 24–25). Low-output start expected.'],
+  },
+  {
+    id: 6,
+    title: 'Pre-Launch Readiness',
+    theme: 'Final checks before the leap. Financial backup. Client base. Portfolio strength.',
+    start_day: 71,
+    end_day: 84,
+    start_date: '2026-07-06',
+    end_date: '2026-07-19',
+    goals: [
+      'Financial backup: 3–4 months of expenses saved and verified.',
+      'Portfolio: 5–7 strong completed projects demonstrating capability.',
+      'Client pipeline: at least 2 recurring + 1–2 new leads active.',
+      'Company profile fully operational — ready for public launch.',
+    ],
+    key_deliverables: [
+      'Startup readiness checklist — all milestones marked complete.',
+      'Financial backup verified — 3–4 months runway confirmed.',
+      'Final portfolio review — all projects polished and presented.',
+      'Company launch plan drafted for post-Day 100 execution.',
+    ],
+    reward: 'Fun Activity',
+    warnings: [],
+  },
+  {
+    id: 7,
+    title: 'Cycle 7 — The Final Push',
+    theme: '16 days. Land the runway. Prove you\'re ready. Day 100 = Aug 4.',
+    start_day: 85,
+    end_day: 100,
+    start_date: '2026-07-20',
+    end_date: '2026-08-04',
+    goals: [
+      'Deliver all remaining client work — clean slate, no loose ends.',
+      'Final revenue push — close any pending deals or invoices.',
+      'Complete "The Book" — 100 days of documented journey.',
+      'Prepare Day 100 presentation — the full story, lessons, and what\'s next.',
+    ],
+    key_deliverables: [
+      'All active projects delivered and invoiced.',
+      '"The Book" — complete 100-day journal documenting the entire journey.',
+      'Day 100 celebration presentation ready.',
+      'Startup launch decision: GO or extend preparation phase.',
+    ],
+    reward: 'Founder of Discipline Award',
+    warnings: [
+      '16 days, not 14. Don\'t peak too early.',
+      'Independence Day (Aug 14) follows Day 100 — symbolic finish line.',
+    ],
+  },
+];
+
+export const BADGE_DEFINITIONS = [
+  { type: 'first_day', label: 'First Step', description: 'Complete your first day' },
+  { type: 'first_week', label: 'Week Warrior', description: 'Complete 7 consecutive days' },
+  { type: '14_day_streak', label: 'Cycle Champion', description: '14-day perfect streak' },
+  { type: 'perfect_week', label: 'Perfect Week', description: 'All tasks + discipline for 7 days' },
+  { type: 'cycle_complete', label: 'Cycle Complete', description: 'Finish an entire cycle' },
+  { type: 'half_century', label: 'Half Century', description: 'Reach Day 50' },
+  { type: 'founder_of_discipline', label: 'Founder of Discipline', description: 'Complete all 100 days' },
+] as const;
