@@ -12,18 +12,23 @@ export function useDailyEntry(dayNumber?: number) {
   const supabase = createClient();
 
   const fetchEntry = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
 
-    const { data } = await supabase
-      .from('daily_entries')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('day_number', targetDay)
-      .single();
+      const { data } = await supabase
+        .from('daily_entries')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('day_number', targetDay)
+        .single();
 
-    setEntry(data);
-    setLoading(false);
+      setEntry(data);
+    } catch (err) {
+      console.error('Daily entry fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
   }, [targetDay]);
 
   useEffect(() => {
@@ -31,121 +36,135 @@ export function useDailyEntry(dayNumber?: number) {
   }, [fetchEntry]);
 
   const toggleTask = async (task: TaskType) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    const field = `${task}_completed` as keyof DailyEntry;
-    const newValue = !entry?.[field];
+      const field = `${task}_completed` as keyof DailyEntry;
+      const newValue = !entry?.[field];
 
-    if (entry) {
-      // Update existing entry
-      const { data } = await supabase
-        .from('daily_entries')
-        .update({ [field]: newValue, updated_at: new Date().toISOString() })
-        .eq('id', entry.id)
-        .select()
-        .single();
-      if (data) setEntry(data);
-    } else {
-      // Create new entry
-      const entryDate = getDateForDay(targetDay).toISOString().split('T')[0];
-      const { data } = await supabase
-        .from('daily_entries')
-        .insert({
-          user_id: user.id,
-          day_number: targetDay,
-          entry_date: entryDate,
-          [field]: newValue,
-        })
-        .select()
-        .single();
-      if (data) setEntry(data);
+      if (entry) {
+        const { data } = await supabase
+          .from('daily_entries')
+          .update({ [field]: newValue, updated_at: new Date().toISOString() })
+          .eq('id', entry.id)
+          .select()
+          .single();
+        if (data) setEntry(data);
+      } else {
+        const entryDate = getDateForDay(targetDay).toISOString().split('T')[0];
+        const { data } = await supabase
+          .from('daily_entries')
+          .insert({
+            user_id: user.id,
+            day_number: targetDay,
+            entry_date: entryDate,
+            [field]: newValue,
+          })
+          .select()
+          .single();
+        if (data) setEntry(data);
+      }
+    } catch (err) {
+      console.error('Toggle task error:', err);
     }
   };
 
   const toggleDiscipline = async (rule: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    const newValue = !entry?.[rule as keyof DailyEntry];
+      const newValue = !entry?.[rule as keyof DailyEntry];
 
-    if (entry) {
-      const { data } = await supabase
-        .from('daily_entries')
-        .update({ [rule]: newValue, updated_at: new Date().toISOString() })
-        .eq('id', entry.id)
-        .select()
-        .single();
-      if (data) setEntry(data);
-    } else {
-      const entryDate = getDateForDay(targetDay).toISOString().split('T')[0];
-      const { data } = await supabase
-        .from('daily_entries')
-        .insert({
-          user_id: user.id,
-          day_number: targetDay,
-          entry_date: entryDate,
-          [rule]: newValue,
-        })
-        .select()
-        .single();
-      if (data) setEntry(data);
+      if (entry) {
+        const { data } = await supabase
+          .from('daily_entries')
+          .update({ [rule]: newValue, updated_at: new Date().toISOString() })
+          .eq('id', entry.id)
+          .select()
+          .single();
+        if (data) setEntry(data);
+      } else {
+        const entryDate = getDateForDay(targetDay).toISOString().split('T')[0];
+        const { data } = await supabase
+          .from('daily_entries')
+          .insert({
+            user_id: user.id,
+            day_number: targetDay,
+            entry_date: entryDate,
+            [rule]: newValue,
+          })
+          .select()
+          .single();
+        if (data) setEntry(data);
+      }
+    } catch (err) {
+      console.error('Toggle discipline error:', err);
     }
   };
 
   const updateNotes = async (field: 'journal_content' | 'learning_topic' | 'notes', value: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    if (entry) {
-      const { data } = await supabase
-        .from('daily_entries')
-        .update({ [field]: value, updated_at: new Date().toISOString() })
-        .eq('id', entry.id)
-        .select()
-        .single();
-      if (data) setEntry(data);
-    } else {
-      const entryDate = getDateForDay(targetDay).toISOString().split('T')[0];
-      const { data } = await supabase
-        .from('daily_entries')
-        .insert({
-          user_id: user.id,
-          day_number: targetDay,
-          entry_date: entryDate,
-          [field]: value,
-        })
-        .select()
-        .single();
-      if (data) setEntry(data);
+      if (entry) {
+        const { data } = await supabase
+          .from('daily_entries')
+          .update({ [field]: value, updated_at: new Date().toISOString() })
+          .eq('id', entry.id)
+          .select()
+          .single();
+        if (data) setEntry(data);
+      } else {
+        const entryDate = getDateForDay(targetDay).toISOString().split('T')[0];
+        const { data } = await supabase
+          .from('daily_entries')
+          .insert({
+            user_id: user.id,
+            day_number: targetDay,
+            entry_date: entryDate,
+            [field]: value,
+          })
+          .select()
+          .single();
+        if (data) setEntry(data);
+      }
+    } catch (err) {
+      console.error('Update notes error:', err);
     }
   };
 
   const updateDeepWorkHours = async (hours: number) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    if (entry) {
-      const { data } = await supabase
-        .from('daily_entries')
-        .update({ deep_work_hours: hours, updated_at: new Date().toISOString() })
-        .eq('id', entry.id)
-        .select()
-        .single();
-      if (data) setEntry(data);
-    } else {
-      const entryDate = getDateForDay(targetDay).toISOString().split('T')[0];
-      const { data } = await supabase
-        .from('daily_entries')
-        .insert({
-          user_id: user.id,
-          day_number: targetDay,
-          entry_date: entryDate,
-          deep_work_hours: hours,
-        })
-        .select()
-        .single();
-      if (data) setEntry(data);
+      if (entry) {
+        const { data } = await supabase
+          .from('daily_entries')
+          .update({ deep_work_hours: hours, updated_at: new Date().toISOString() })
+          .eq('id', entry.id)
+          .select()
+          .single();
+        if (data) setEntry(data);
+      } else {
+        const entryDate = getDateForDay(targetDay).toISOString().split('T')[0];
+        const { data } = await supabase
+          .from('daily_entries')
+          .insert({
+            user_id: user.id,
+            day_number: targetDay,
+            entry_date: entryDate,
+            deep_work_hours: hours,
+          })
+          .select()
+          .single();
+        if (data) setEntry(data);
+      }
+    } catch (err) {
+      console.error('Update deep work hours error:', err);
     }
   };
 

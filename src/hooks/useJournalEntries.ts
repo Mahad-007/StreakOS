@@ -17,19 +17,24 @@ export function useJournalEntries() {
   const supabase = createClient();
 
   const fetchEntries = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
 
-    const { data } = await supabase
-      .from('daily_entries')
-      .select('id, day_number, entry_date, journal_content, updated_at')
-      .eq('user_id', user.id)
-      .not('journal_content', 'is', null)
-      .neq('journal_content', '')
-      .order('day_number', { ascending: true });
+      const { data } = await supabase
+        .from('daily_entries')
+        .select('id, day_number, entry_date, journal_content, updated_at')
+        .eq('user_id', user.id)
+        .not('journal_content', 'is', null)
+        .neq('journal_content', '')
+        .order('day_number', { ascending: true });
 
-    if (data) setEntries(data as JournalEntry[]);
-    setLoading(false);
+      if (data) setEntries(data as JournalEntry[]);
+    } catch (err) {
+      console.error('Journal entries fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -37,20 +42,21 @@ export function useJournalEntries() {
   }, [fetchEntries]);
 
   const updateEntry = async (id: string, content: string) => {
-    // Optimistic update
     setEntries((prev) =>
       prev.map((e) =>
         e.id === id ? { ...e, journal_content: content, updated_at: new Date().toISOString() } : e
       )
     );
 
-    const { error } = await supabase
-      .from('daily_entries')
-      .update({ journal_content: content, updated_at: new Date().toISOString() })
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('daily_entries')
+        .update({ journal_content: content, updated_at: new Date().toISOString() })
+        .eq('id', id);
 
-    if (error) {
-      // Revert on failure
+      if (error) fetchEntries();
+    } catch (err) {
+      console.error('Journal update error:', err);
       fetchEntries();
     }
   };
