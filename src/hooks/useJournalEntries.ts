@@ -18,13 +18,14 @@ export function useJournalEntries() {
 
   const fetchEntries = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setLoading(false); return; }
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      if (!userId) { setLoading(false); return; }
 
       const { data } = await supabase
         .from('daily_entries')
         .select('id, day_number, entry_date, journal_content, updated_at')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .not('journal_content', 'is', null)
         .neq('journal_content', '')
         .order('day_number', { ascending: true });
@@ -56,7 +57,6 @@ export function useJournalEntries() {
       }
 
       if (data) {
-        // Update local state with the confirmed server data
         setEntries((prev) =>
           prev.map((e) => (e.id === id ? (data as JournalEntry) : e))
         );

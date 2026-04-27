@@ -28,19 +28,17 @@ export function useAnalytics() {
     const fetchAnalytics = async () => {
       try {
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) { setLoading(false); return; }
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) { setLoading(false); return; }
 
         const { data: entries } = await supabase
           .from('daily_entries')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .order('day_number');
 
-        if (!entries) {
-          setLoading(false);
-          return;
-        }
+        if (!entries) { setLoading(false); return; }
 
         const currentDay = getDayNumber();
         const totalDays = currentDay;
@@ -91,7 +89,7 @@ export function useAnalytics() {
         const { data: streaks } = await supabase
           .from('streaks')
           .select('longest_streak')
-          .eq('user_id', user.id)
+          .eq('user_id', userId)
           .eq('streak_type', 'perfect_day')
           .single();
 

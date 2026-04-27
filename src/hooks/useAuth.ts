@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { Profile } from '@/types';
@@ -10,18 +11,21 @@ export function useAuth() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
-    const getUser = async () => {
+    const init = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
+        // getSession reads from local storage — instant, no network call
+        const { data: { session } } = await supabase.auth.getSession();
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
 
-        if (user) {
+        if (currentUser) {
           const { data } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', user.id)
+            .eq('id', currentUser.id)
             .single();
           setProfile(data);
         }
@@ -32,17 +36,18 @@ export function useAuth() {
       }
     };
 
-    getUser();
+    init();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        if (currentUser) {
           try {
             const { data } = await supabase
               .from('profiles')
               .select('*')
-              .eq('id', session.user.id)
+              .eq('id', currentUser.id)
               .single();
             setProfile(data);
           } catch (err) {
@@ -61,6 +66,7 @@ export function useAuth() {
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
+    router.push('/login');
   };
 
   return { user, profile, loading, signOut, supabase };

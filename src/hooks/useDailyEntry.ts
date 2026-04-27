@@ -11,21 +11,26 @@ export function useDailyEntry(dayNumber?: number) {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
+  const getUserId = async (): Promise<string | null> => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.user?.id ?? null;
+  };
+
   const fetchEntry = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setLoading(false); return; }
+      const userId = await getUserId();
+      if (!userId) { setLoading(false); return; }
 
       const { data } = await supabase
         .from('daily_entries')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('day_number', targetDay)
         .single();
 
       setEntry(data);
     } catch (err) {
-      console.error('Daily entry fetch error:', err);
+      // single() throws when no row found — that's expected for empty days
     } finally {
       setLoading(false);
     }
@@ -37,8 +42,8 @@ export function useDailyEntry(dayNumber?: number) {
 
   const toggleTask = async (task: TaskType) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const userId = await getUserId();
+      if (!userId) return;
 
       const field = `${task}_completed` as keyof DailyEntry;
       const newValue = !entry?.[field];
@@ -56,7 +61,7 @@ export function useDailyEntry(dayNumber?: number) {
         const { data } = await supabase
           .from('daily_entries')
           .insert({
-            user_id: user.id,
+            user_id: userId,
             day_number: targetDay,
             entry_date: entryDate,
             [field]: newValue,
@@ -72,8 +77,8 @@ export function useDailyEntry(dayNumber?: number) {
 
   const toggleDiscipline = async (rule: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const userId = await getUserId();
+      if (!userId) return;
 
       const newValue = !entry?.[rule as keyof DailyEntry];
 
@@ -90,7 +95,7 @@ export function useDailyEntry(dayNumber?: number) {
         const { data } = await supabase
           .from('daily_entries')
           .insert({
-            user_id: user.id,
+            user_id: userId,
             day_number: targetDay,
             entry_date: entryDate,
             [rule]: newValue,
@@ -106,8 +111,8 @@ export function useDailyEntry(dayNumber?: number) {
 
   const updateNotes = async (field: 'journal_content' | 'learning_topic' | 'notes', value: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const userId = await getUserId();
+      if (!userId) return;
 
       if (entry) {
         const { data } = await supabase
@@ -122,7 +127,7 @@ export function useDailyEntry(dayNumber?: number) {
         const { data } = await supabase
           .from('daily_entries')
           .insert({
-            user_id: user.id,
+            user_id: userId,
             day_number: targetDay,
             entry_date: entryDate,
             [field]: value,
@@ -138,8 +143,8 @@ export function useDailyEntry(dayNumber?: number) {
 
   const updateDeepWorkHours = async (hours: number) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const userId = await getUserId();
+      if (!userId) return;
 
       if (entry) {
         const { data } = await supabase
@@ -154,7 +159,7 @@ export function useDailyEntry(dayNumber?: number) {
         const { data } = await supabase
           .from('daily_entries')
           .insert({
-            user_id: user.id,
+            user_id: userId,
             day_number: targetDay,
             entry_date: entryDate,
             deep_work_hours: hours,
