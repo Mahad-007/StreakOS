@@ -15,6 +15,7 @@ interface MemberStats {
   todayEntry: DailyEntry | null;
   streaks: Streak[];
   overallRate: number;
+  taskRates: Record<string, number>;
 }
 
 export default function TeamPage() {
@@ -54,12 +55,21 @@ export default function TeamPage() {
 
         let totalTasks = 0;
         let completedTasks = 0;
+        const taskCounts: Record<string, number> = {};
+        TASKS.forEach((t) => (taskCounts[t.id] = 0));
+
         allEntries?.forEach((e) => {
           totalTasks += 4;
-          if (e.fitness_completed) completedTasks++;
-          if (e.deep_work_completed) completedTasks++;
-          if (e.learning_completed) completedTasks++;
-          if (e.journal_completed) completedTasks++;
+          if (e.fitness_completed) { completedTasks++; taskCounts['fitness']++; }
+          if (e.deep_work_completed) { completedTasks++; taskCounts['deep_work']++; }
+          if (e.learning_completed) { completedTasks++; taskCounts['learning']++; }
+          if (e.journal_completed) { completedTasks++; taskCounts['journal']++; }
+        });
+
+        const totalDays = allEntries?.length || 0;
+        const taskRates: Record<string, number> = {};
+        TASKS.forEach((t) => {
+          taskRates[t.id] = totalDays > 0 ? (taskCounts[t.id] / totalDays) * 100 : 0;
         });
 
         memberStats.push({
@@ -67,6 +77,7 @@ export default function TeamPage() {
           todayEntry: todayEntry || null,
           streaks: streaks || [],
           overallRate: totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0,
+          taskRates,
         });
       }
 
@@ -203,9 +214,9 @@ export default function TeamPage() {
             </h3>
             <div className="space-y-3">
               {['Overall', ...TASKS.map(t => t.label)].map((label) => {
-                const val1 = label === 'Overall' ? members[0].overallRate : 0;
-                const val2 = label === 'Overall' ? members[1].overallRate : 0;
-                const max = Math.max(val1, val2, 1);
+                const task = TASKS.find((t) => t.label === label);
+                const val1 = label === 'Overall' ? members[0].overallRate : (members[0].taskRates[task!.id] || 0);
+                const val2 = label === 'Overall' ? members[1].overallRate : (members[1].taskRates[task!.id] || 0);
 
                 return (
                   <div key={label} className="flex items-center gap-3">
@@ -214,7 +225,7 @@ export default function TeamPage() {
                       <motion.div
                         className="h-4 rounded-sm bg-accent/60"
                         initial={{ width: 0 }}
-                        animate={{ width: `${(val1 / max) * 100}%` }}
+                        animate={{ width: `${val1}%` }}
                         transition={{ duration: 0.8, delay: 0.5 }}
                       />
                       <span className="text-[10px] font-mono text-text-muted min-w-[30px]">
@@ -226,7 +237,7 @@ export default function TeamPage() {
                       <motion.div
                         className="h-4 rounded-sm bg-info/60"
                         initial={{ width: 0 }}
-                        animate={{ width: `${(val2 / max) * 100}%` }}
+                        animate={{ width: `${val2}%` }}
                         transition={{ duration: 0.8, delay: 0.5 }}
                       />
                       <span className="text-[10px] font-mono text-text-muted min-w-[30px] text-right">
