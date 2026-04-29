@@ -5,9 +5,9 @@ import { motion } from 'framer-motion';
 import { BookOpen, Download, Loader2 } from 'lucide-react';
 import { PageTransition } from '@/components/animations/PageTransition';
 import { JournalEntryCard } from '@/components/journal/JournalEntryCard';
-import { useJournalEntries } from '@/hooks/useJournalEntries';
+import { JournalModal } from '@/components/journal/JournalModal';
+import { useJournalEntries, JournalEntry } from '@/hooks/useJournalEntries';
 import { useAuth } from '@/hooks/useAuth';
-import { getCycleForDay } from '@/lib/utils';
 import { CYCLES } from '@/lib/constants';
 import { staggerContainer } from '@/lib/animations/variants';
 
@@ -15,6 +15,7 @@ export default function JournalPage() {
   const { entries, loading, updateEntry } = useJournalEntries();
   const { profile } = useAuth();
   const [generating, setGenerating] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
 
   // Group entries by cycle
   const groupedByCycle = CYCLES.map((cycle) => ({
@@ -56,11 +57,13 @@ export default function JournalPage() {
   if (loading) {
     return (
       <PageTransition>
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-5xl mx-auto space-y-6">
           <div className="h-8 w-48 bg-surface rounded animate-pulse" />
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-32 bg-surface border border-border rounded-xl animate-pulse" />
-          ))}
+          <div className="flex gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="w-[240px] h-[220px] bg-surface border border-border rounded-xl animate-pulse shrink-0" />
+            ))}
+          </div>
         </div>
       </PageTransition>
     );
@@ -68,7 +71,7 @@ export default function JournalPage() {
 
   return (
     <PageTransition>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -146,9 +149,9 @@ export default function JournalPage() {
               <div className="h-px flex-1 bg-border" />
             </motion.div>
 
-            {/* Entries */}
+            {/* Horizontal card row */}
             <motion.div
-              className="space-y-3"
+              className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin"
               variants={staggerContainer(0.06)}
               initial="hidden"
               animate="visible"
@@ -157,13 +160,20 @@ export default function JournalPage() {
                 <JournalEntryCard
                   key={entry.id}
                   entry={entry}
-                  onUpdate={updateEntry}
+                  onSelect={setSelectedEntry}
                 />
               ))}
             </motion.div>
           </div>
         ))}
       </div>
+
+      {/* Detail modal */}
+      <JournalModal
+        entry={selectedEntry}
+        onClose={() => setSelectedEntry(null)}
+        onUpdate={updateEntry}
+      />
     </PageTransition>
   );
 }
