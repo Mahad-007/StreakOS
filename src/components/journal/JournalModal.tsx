@@ -93,15 +93,15 @@ export function JournalModal({ entry, onClose, onUpdate }: JournalModalProps) {
     <AnimatePresence>
       {entry && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center px-4 py-20"
+          className="fixed inset-x-0 top-16 bottom-0 z-50 flex items-center justify-center px-4 py-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          {/* Backdrop */}
+          {/* Backdrop — covers full viewport including behind the header */}
           <motion.div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -110,7 +110,7 @@ export function JournalModal({ entry, onClose, onUpdate }: JournalModalProps) {
 
           {/* Modal */}
           <motion.div
-            className="relative w-full max-w-2xl max-h-[85vh] bg-surface border border-border rounded-2xl shadow-lg overflow-hidden flex flex-col"
+            className="relative w-full max-w-2xl max-h-full bg-surface border border-border rounded-2xl shadow-lg overflow-hidden flex flex-col"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
