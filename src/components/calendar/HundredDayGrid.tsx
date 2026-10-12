@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { DayCell } from './DayCell';
 import { createClient } from '@/lib/supabase/client';
 import { DailyEntry, DayStatus } from '@/types';
-import { getDayNumber, getDayStatus, getCompletionPercentage } from '@/lib/utils';
+import { getDayStatus, getCompletionPercentage } from '@/lib/utils';
 import { CYCLES, TOTAL_DAYS } from '@/lib/constants';
 
 interface HundredDayGridProps {
