@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Flame, Trophy, BookOpen, Zap, TrendingUp } from 'lucide-react';
+import { Users, Flame, Trophy } from 'lucide-react';
 import { PageTransition } from '@/components/animations/PageTransition';
 import { createClient } from '@/lib/supabase/client';
 import { Profile, Streak, DailyEntry } from '@/types';

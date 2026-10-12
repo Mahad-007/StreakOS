@@ -1,20 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useSyncExternalStore } from 'react';
 import { motion } from 'framer-motion';
-import { Video, Clock } from 'lucide-react';
+import { Video } from 'lucide-react';
 import { getNextFriday, getTimeUntil } from '@/lib/utils';
 
-export function FridayCountdown() {
-  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
+function subscribeToClock(onTick: () => void) {
+  const interval = setInterval(onTick, 1000);
+  return () => clearInterval(interval);
+}
 
-  useEffect(() => {
-    setTimeLeft(getTimeUntil(getNextFriday()));
-    const interval = setInterval(() => {
-      setTimeLeft(getTimeUntil(getNextFriday()));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+const getSecond = () => Math.floor(Date.now() / 1000);
+const getServerSecond = () => null;
+
+export function FridayCountdown() {
+  // null on the server so the countdown doesn't cause a hydration mismatch
+  const second = useSyncExternalStore(subscribeToClock, getSecond, getServerSecond);
+  const timeLeft = second === null ? null : getTimeUntil(getNextFriday());
 
   return (
     <motion.div

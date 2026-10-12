@@ -14,13 +14,13 @@ export interface JournalEntry {
 export function useJournalEntries() {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const [supabase] = useState(createClient);
 
-  const fetchEntries = useCallback(async () => {
+  const loadEntries = useCallback(async (): Promise<JournalEntry[] | null> => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id;
-      if (!userId) { setLoading(false); return; }
+      if (!userId) return null;
 
       const { data } = await supabase
         .from('daily_entries')
@@ -30,17 +30,28 @@ export function useJournalEntries() {
         .neq('journal_content', '')
         .order('day_number', { ascending: true });
 
-      if (data) setEntries(data as JournalEntry[]);
+      return (data as JournalEntry[] | null) ?? null;
     } catch (err) {
       console.error('Journal entries fetch error:', err);
-    } finally {
-      setLoading(false);
+      return null;
     }
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
-    fetchEntries();
-  }, [fetchEntries]);
+    let cancelled = false;
+    loadEntries().then((data) => {
+      if (cancelled) return;
+      if (data) setEntries(data);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [loadEntries]);
+
+  const fetchEntries = useCallback(async () => {
+    const data = await loadEntries();
+    if (data) setEntries(data);
+    setLoading(false);
+  }, [loadEntries]);
 
   const updateEntry = async (id: string, content: string): Promise<boolean> => {
     try {

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Pencil, Check, Loader2, Calendar, Hash } from 'lucide-react';
+import { X, Pencil, Check, Loader2, Calendar } from 'lucide-react';
 import { JournalEntry } from '@/hooks/useJournalEntries';
 import { getDateForDay, formatDate, getCycleForDay, getDayOfWeek } from '@/lib/utils';
 
@@ -20,13 +20,16 @@ export function JournalModal({ entry, onClose, onUpdate }: JournalModalProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const savingRef = useRef(false);
 
-  useEffect(() => {
+  // Reset local state whenever a different entry is opened.
+  const [prevEntry, setPrevEntry] = useState(entry);
+  if (entry !== prevEntry) {
+    setPrevEntry(entry);
     if (entry) {
       setLocalContent(entry.journal_content);
       setIsEditing(false);
       setSaveError(false);
     }
-  }, [entry]);
+  }
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -35,21 +38,6 @@ export function JournalModal({ entry, onClose, onUpdate }: JournalModalProps) {
       textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
     }
   }, [isEditing]);
-
-  // Close on Escape
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (isEditing) {
-          handleCancel();
-        } else {
-          onClose();
-        }
-      }
-    };
-    if (entry) window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [entry, isEditing]);
 
   const handleSave = useCallback(async () => {
     if (savingRef.current || !entry) return;
@@ -76,12 +64,27 @@ export function JournalModal({ entry, onClose, onUpdate }: JournalModalProps) {
     }
   }, [localContent, entry, onUpdate]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     if (saving) return;
     if (entry) setLocalContent(entry.journal_content);
     setIsEditing(false);
     setSaveError(false);
-  };
+  }, [saving, entry]);
+
+  // Close on Escape
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isEditing) {
+          handleCancel();
+        } else {
+          onClose();
+        }
+      }
+    };
+    if (entry) window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [entry, isEditing, handleCancel, onClose]);
 
   if (!entry) return null;
 

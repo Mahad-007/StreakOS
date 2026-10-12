@@ -16,23 +16,24 @@ export default function TodayPage() {
   const [selectedDay, setSelectedDay] = useState(getDayNumber());
   const { entry, loading, toggleTask, toggleDiscipline, updateNotes } = useDailyEntry(selectedDay);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [justCompleted, setJustCompleted] = useState(false);
 
   const completionCount = getCompletionCount(entry);
   const isAllComplete = completionCount === 4;
   const currentCycle = getCycleForDay(selectedDay);
   const isToday = selectedDay === getDayNumber();
 
+  // Fire confetti when the day flips to fully complete.
+  const [wasAllComplete, setWasAllComplete] = useState(isAllComplete);
+  if (isAllComplete !== wasAllComplete) {
+    setWasAllComplete(isAllComplete);
+    if (isAllComplete) setShowConfetti(true);
+  }
+
   useEffect(() => {
-    if (isAllComplete && !justCompleted) {
-      setShowConfetti(true);
-      setJustCompleted(true);
-      setTimeout(() => setShowConfetti(false), 3000);
-    }
-    if (!isAllComplete) {
-      setJustCompleted(false);
-    }
-  }, [isAllComplete, justCompleted]);
+    if (!showConfetti) return;
+    const timer = setTimeout(() => setShowConfetti(false), 3000);
+    return () => clearTimeout(timer);
+  }, [showConfetti]);
 
   const handleToggleTask = async (taskId: TaskType) => {
     await toggleTask(taskId);

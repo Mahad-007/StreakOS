@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Eye } from 'lucide-react';
 import { JournalEntry } from '@/hooks/useJournalEntries';
-import { getDateForDay, formatDate, getCycleForDay, getDayOfWeek } from '@/lib/utils';
+import { getDateForDay, formatDate } from '@/lib/utils';
 import { staggerChild } from '@/lib/animations/variants';
 
 interface JournalEntryCardProps {

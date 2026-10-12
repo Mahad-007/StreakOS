@@ -9,17 +9,18 @@ export function useDailyEntry(dayNumber?: number) {
   const targetDay = dayNumber ?? getDayNumber();
   const [entry, setEntry] = useState<DailyEntry | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const [supabase] = useState(createClient);
 
-  const getUserId = async (): Promise<string | null> => {
+  const getUserId = useCallback(async (): Promise<string | null> => {
     const { data: { session } } = await supabase.auth.getSession();
     return session?.user?.id ?? null;
-  };
+  }, [supabase]);
 
-  const fetchEntry = useCallback(async () => {
+  // Returns undefined when there's nothing to show (signed out or no row yet).
+  const loadEntry = useCallback(async (): Promise<DailyEntry | null | undefined> => {
     try {
       const userId = await getUserId();
-      if (!userId) { setLoading(false); return; }
+      if (!userId) return undefined;
 
       const { data } = await supabase
         .from('daily_entries')
@@ -28,17 +29,28 @@ export function useDailyEntry(dayNumber?: number) {
         .eq('day_number', targetDay)
         .single();
 
-      setEntry(data);
-    } catch (err) {
+      return data;
+    } catch {
       // single() throws when no row found — that's expected for empty days
-    } finally {
-      setLoading(false);
+      return undefined;
     }
-  }, [targetDay]);
+  }, [supabase, getUserId, targetDay]);
 
   useEffect(() => {
-    fetchEntry();
-  }, [fetchEntry]);
+    let cancelled = false;
+    loadEntry().then((data) => {
+      if (cancelled) return;
+      if (data !== undefined) setEntry(data);
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [loadEntry]);
+
+  const fetchEntry = useCallback(async () => {
+    const data = await loadEntry();
+    if (data !== undefined) setEntry(data);
+    setLoading(false);
+  }, [loadEntry]);
 
   const toggleTask = async (task: TaskType) => {
     try {
